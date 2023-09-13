@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="stylesheet" href="css/nullstyle.css" />
+		<link rel="stylesheet" href="css/style.css" />
+		<title>task1</title>
+	</head>
+	<body>
+		<main class="page">
+			<div class="page__container">
+				<div class="task">
+					<div class="task__condition text">Задача 2. Створити клас Bank, у якому зберігається масив клієнтів. Виконати такі операції</div>
+					<ul class="li">
+						Вивести усіх простих клієнтів;
+					</ul>
+					<ul class="li">
+						Вивести усіх клієнтів GoldenClient;
+					</ul>
+					<ul class="li">
+						Знати сумарну кількість грошей на рахунку;
+					</ul>
+				</div>
+				<div class="clients"></div>
+			</div>
+		</main>
+		<script>
+			class Client {
+				constructor(id, fullName, moneyAmount) {
+					this.id = id
+					this.fullName = fullName
+					this.moneyAmount = moneyAmount
+				}
+				render(containerSelector) {
+					let inputAddMoney = document.createElement("input")
+					inputAddMoney.setAttribute("id", "addId")
+					inputAddMoney.setAttribute("type", "number")
+					inputAddMoney.setAttribute("placeholder", "додати гроші на рахунок")
+					//===================================================
+					let inputGetMoney = document.createElement("input")
+					inputGetMoney.setAttribute("id", "getId")
+					inputGetMoney.setAttribute("type", "number")
+					inputGetMoney.setAttribute("placeholder", "зняти гроші з рахунку")
+					//======================================
+					this.userMoneyBlock = document.createElement("div")
+					this.userMoneyBlock.innerText = "user money "
+					this.userMoneyBlockSpan = document.createElement("span")
+					this.userMoneyBlockSpan.innerText = `${this.moneyAmount}`
+					this.userMoneyBlock.append(this.userMoneyBlockSpan)
+					if (containerSelector) {
+						containerSelector.style.cssText = `
+			               display: inline-flex;
+			               gap: 10px;
+			               flex-direction: column;
+			               `
+						if (containerSelector) {
+							containerSelector.append(inputAddMoney)
+							this.inputAddMoney = inputAddMoney
+							inputAddMoney.addEventListener("change", this.addMoney.bind(this))
+							//====================================================
+							containerSelector.append(inputGetMoney)
+							containerSelector.append(this.userMoneyBlock)
+
+							this.inputGetMoney = inputGetMoney
+							inputGetMoney.addEventListener("change", this.getMoney.bind(this))
+						}
+					}
+				}
+				addMoney() {
+					if (this.inputAddMoney.value < 0 || this.inputAddMoney.value[0] == "0" || this.inputAddMoney.value == "") this.inputAddMoney.value = "0"
+					else {
+						this.moneyAmount += parseInt(this.inputAddMoney.value)
+						this.userMoneyBlockSpan.innerText = `${this.moneyAmount}`
+					}
+				}
+
+				getMoney() {
+					let moneyRest = this.moneyAmount - this.inputGetMoney.value
+					if (moneyRest >= 0) {
+						//this.moneyAmount -= parseInt(this.inputAddMoney.value)
+						this.moneyAmount -= this.inputGetMoney.value
+						this.userMoneyBlockSpan.innerText = `${this.moneyAmount}`
+					}
+				}
+
+				toString() {
+					return `Name ${this.fullName} -- user money : ${this.moneyAmount} --- id: ${this.id}`
+				}
+			}
+			//======== class GoldenClient ================
+			class GoldenClient extends Client {
+				constructor(id, fullName, moneyAmount, limitOfCreditFounds, percentsForUsingCreditFounds, gotCredit = false) {
+					super(id, fullName, moneyAmount)
+					this.limitOfCreditFounds = limitOfCreditFounds
+					this.percentsForUsingCreditFounds = percentsForUsingCreditFounds
+					this.gotCredit = gotCredit
+					this.usedCreditFounds = 0
+				}
+				render(containerSelector) {
+					super.render(containerSelector)
+					if (containerSelector) {
+						let fineForUsingCreditFounds = document.createElement("div")
+						fineForUsingCreditFounds.append("пеня за використання кредитних коштів : ")
+						let fineForUsingCreditFoundsSpan = document.createElement("span")
+						this.fineForUsingCreditFoundsSpan = fineForUsingCreditFoundsSpan
+						let limitOfCreditFoundsBlock = document.createElement("div")
+						limitOfCreditFoundsBlock.append("кредитні кошти : ")
+						let limitOfCreditFoundsBlockSpan = document.createElement("span")
+						limitOfCreditFoundsBlockSpan.innerText = `${this.limitOfCreditFounds}`
+						this.limitOfCreditFoundsBlockSpan = limitOfCreditFoundsBlockSpan
+						limitOfCreditFoundsBlock.append(limitOfCreditFoundsBlockSpan)
+						containerSelector.append(limitOfCreditFoundsBlock)
+						//  ====================================
+						fineForUsingCreditFounds.append(fineForUsingCreditFoundsSpan)
+						containerSelector.append(fineForUsingCreditFounds)
+						this.containerSelector = containerSelector
+						//let
+					}
+				}
+				getMoney() {
+					let moneyRest = this.moneyAmount - this.inputGetMoney.value
+					if (moneyRest < -this.limitOfCreditFounds && moneyRest !== 0) {
+						alert("ви не можете зняти кошти навіть якщо візьмите кредит")
+					}
+					if (moneyRest < 0 && moneyRest >= -this.limitOfCreditFounds && this.limitOfCreditFounds > 0) {
+						alert("ваших грошей недостатньо, якщо захочете можете взяти кредит")
+						if (!this.buttonGetCredit) {
+							let buttonGetCredit = document.createElement("button")
+							buttonGetCredit.innerText = "взяти кредит"
+							this.buttonGetCredit = buttonGetCredit
+							this.containerSelector.append(buttonGetCredit)
+							buttonGetCredit.addEventListener("click", this.determineFine.bind(this))
+						}
+					}
+					super.getMoney()
+				}
+				determineFine() {
+					if (this.moneyAmount - this.inputGetMoney.value >= 0) {
+						alert("оскільки ви поповнили  баланс вам не потрібні кредитні кошти")
+						this.buttonGetCredit.remove()
+					} else {
+						let sum = this.moneyAmount + this.limitOfCreditFounds
+						let restOfCreditFounds = sum - this.inputGetMoney.value
+						this.usedCreditFounds += this.limitOfCreditFounds - restOfCreditFounds
+						this.moneyAmount = 0
+						this.limitOfCreditFounds = restOfCreditFounds
+						this.fineForUsingCreditFoundsSpan.innerText = `${this.usedCreditFounds * this.percentsForUsingCreditFounds}`
+						this.limitOfCreditFoundsBlockSpan.innerText = `${this.limitOfCreditFounds}`
+						this.userMoneyBlockSpan.innerText = `${this.moneyAmount}`
+					}
+				}
+				toString() {
+					return `Name ${this.fullName} -- user money : ${this.moneyAmount} --- id: ${this.id} -- credit percent ${this.percentsForUsingCreditFounds}`
+				}
+			}
+			//====================BANK===============
+			class Bank {
+				#clientsList
+				constructor(clientsList) {
+					this.ClientsList = clientsList
+				}
+				get ClientsList() {
+					return this.#clientsList
+				}
+				set ClientsList(clientsArr) {
+					if (Array.isArray(clientsArr) && clientsArr.length > 0) {
+						for (const client of clientsArr) {
+							if (!(client instanceof Client || client instanceof GoldenClient)) return document.write("клієнтів немає")
+						}
+						return (this.#clientsList = clientsArr)
+					}
+				}
+				getGoldenClient() {
+					return this.ClientsList.filter((client) => client instanceof GoldenClient)
+				}
+				getSimpleClient() {
+					return this.ClientsList.filter((client) => !(client instanceof GoldenClient))
+				}
+				getOveralMoneyAmount() {
+					return this.ClientsList.reduce((prevSum, client) => prevSum + client.moneyAmount, 0)
+				}
+			}
+			//===================================
+			window.onload = function () {
+				let clientsList = [
+					new Client(3424, "Tersak T.U", 3000),
+					new GoldenClient(4352, "Sviator F.U", 3400, 300, 1.2),
+					new Client(2346, "Zinchenko M.T", 45000),
+					new Client(7936, "LuciCk T.U", 400),
+					new GoldenClient(3458, "Sevchenko G.A", 3400, 300, 1.2),
+					new GoldenClient(9983, "Franko W.K", 3400, 300, 1.2),
+					new Client(8373, "Kalka T.H", 98000),
+				]
+
+				let bank = new Bank(clientsList)
+				console.log(bank.getSimpleClient())
+				console.log(bank.getGoldenClient())
+				console.log(bank.getOveralMoneyAmount())
+			}
+		</script>
+	</body>
+</html>

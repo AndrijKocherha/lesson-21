@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="stylesheet" href="css/nullstyle.css" />
+		<link rel="stylesheet" href="css/style.css" />
+		<title>task2</title>
+	</head>
+	<body>
+		<main class="page">
+			<div class="page__container">
+				<div class="task">
+					<div class="task__condition text">Задача 3. Розробити Класи (House, Dog, Bird)</div>
+				</div>
+				<div class="example"></div>
+			</div>
+		</main>
+		<script>
+			class DefaultElement {
+				constructor(coordinateX, coordinateY, src, updateInterval) {
+					this.coordinateX = coordinateX
+					this.coordinateY = coordinateY
+					this.src = src
+					this.updateInterval = updateInterval
+				}
+				getRandValue(minNum, maxNum) {
+					return minNum + Math.floor(Math.random() * (maxNum - minNum + 1))
+				}
+				render(containerSelector) {
+					let imgContainer = document.createElement("div")
+					let img = document.createElement("img")
+					img.setAttribute("src", this.src)
+					imgContainer.append(img)
+					img.style.cssText = `
+			            width: 100%;
+			            height: 100%;
+			            `
+					imgContainer.style.cssText = `
+			            position: absolute;
+			            top: ${this.coordinateY}%;
+			            left: ${this.coordinateX}%;
+			            width: 100px;
+			            height: 100px;
+			            `
+					if (containerSelector) {
+						this.imgContainer = imgContainer
+						containerSelector.append(imgContainer)
+					}
+				}
+				runElement(minNum, maxNum) {
+					setInterval(() => {
+						this.influenceOnEl(minNum, maxNum)
+					}, this.updateInterval)
+				}
+			}
+			//=====================HOUSE=====================
+			class House extends DefaultElement {
+				constructor(coordinateX, coordinateY, src, updateInterval) {
+					super(coordinateX, coordinateY, src, updateInterval)
+				}
+				influenceOnEl(minNum, maxNum) {
+					this.imgContainer.style.scale = `${this.getRandValue(minNum, maxNum)}`
+				}
+			}
+			//=====================DOG=====================
+			class Dog extends DefaultElement {
+				constructor(coordinateX, coordinateY, src, updateInterval) {
+					super(coordinateX, coordinateY, src, updateInterval)
+				}
+				influenceOnEl(minNum, maxNum) {
+					this.imgContainer.style.left = `${this.getRandValue(minNum, maxNum)}%`
+				}
+			}
+			//===============Bird=========================
+			class Bird extends DefaultElement {
+				constructor(coordinateX, coordinateY, src, updateInterval) {
+					super(coordinateX, coordinateY, src, updateInterval)
+				}
+				influenceOnEl(minNum, maxNum) {
+					this.imgContainer.style.left = `${this.getRandValue(minNum, maxNum)}%`
+					this.imgContainer.style.top = `${this.getRandValue(minNum, maxNum)}%`
+				}
+			}
+			window.onload = function () {
+				let house = new House(20, 10, "img/house.jpg", 2000)
+				house.render(document.querySelector(".example"))
+				house.runElement(0, 3)
+				//==============================
+				let dog = new Dog(0, 40, "img/dog.jpg", 1000)
+				dog.render(document.querySelector(".example"))
+				dog.runElement(0, 100)
+				//==============================
+				let bird = new Bird(50, 40, "img/bird.webp", 2000)
+				bird.render(document.querySelector(".example"))
+				bird.runElement(1, 70)
+			}
+		</script>
+	</body>
+</html>

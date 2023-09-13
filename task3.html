@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="stylesheet" href="css/nullstyle.css" />
+		<link rel="stylesheet" href="css/style.css" />
+		<title>task3</title>
+	</head>
+	<body>
+		<main class="page">
+			<div class="page__container">
+				<div class="task">
+					<div class="task__condition text">
+						Задача 4. Користувач задає місяць навчання учня (перевіряти чи є числом, чи від 1 до 12, чи не канікули) та оцінку (перевіряти чи є числом, чи від 1 до 100).
+						Вивести чи зможе він виправити оцінку (якщо оцінка погана і це не останній місяць у семестрі) . Обробку усіх помилок зробити з використанням відповідних
+						класів.
+					</div>
+				</div>
+				<div class="example"></div>
+			</div>
+		</main>
+		<script>
+			//class IsCorrectMounthError extends Error {
+			//	constructor() {
+			//		super()
+			//		this.message = "Такого місяця не існує або зараз тривають канікули"
+			//		this.name = "IsCorrectMounthError"
+			//	}
+			//}
+			//class IsCorrectMarkError extends Error {
+			//	constructor(mark) {
+			//		this.message = `Некоректна оцінка яку ви ввели  ${mark}`
+			//		this.name = "isCorrectMarkError"
+			//	}
+			//}
+			//class CanFixMarkError extends Error {
+			//	constructor() {
+			//		super()
+			//		this.message = "ви не можете виправити оцінку"
+			//		this.name = "CanFixMarkError"
+			//	}
+			//}
+			//==============================Працює ===================================
+			class IsCorrectMounthError extends Error {
+				constructor() {
+					super("Такого місяця не існує або зараз тривають канікули")
+					this.name = "IsCorrectMounthError"
+				}
+			}
+
+			class IsCorrectMarkError extends Error {
+				constructor(mark) {
+					super(`Некоректна оцінка, яку ви ввели: ${mark}`)
+					this.name = "IsCorrectMarkError"
+				}
+			}
+
+			class CanFixMarkError extends Error {
+				constructor() {
+					super("Ви не можете виправити оцінку")
+					this.name = "CanFixMarkError"
+				}
+			}
+
+			//====================================================
+			class Student {
+				constructor(holidayMounths, lastStudyMounth, minMark, maxMark, minMarkToGoNextGrade) {
+					this.holidayMounths = holidayMounths
+					this.lastStudyMounth = lastStudyMounth
+					this.minMark = minMark
+					this.maxMark = maxMark
+					this.minMarkToGoNextGrade = minMarkToGoNextGrade
+				}
+				render(containerSelector) {
+					let markInput = document.createElement("input")
+					markInput.setAttribute("type", "number")
+					markInput.setAttribute("placeholder", "Введіть вашу оцінку")
+					//==========================================
+					let mounthInput = document.createElement("input")
+					mounthInput.setAttribute("type", "number")
+					mounthInput.setAttribute("placeholder", "Введіть місяць навчання")
+					//==========================
+					let button = document.createElement("button")
+					button.innerText = "Перевірити правильність "
+					//===============
+					if (containerSelector) {
+						this.mounthInput = mounthInput
+						this.markInput = markInput
+						containerSelector.style.cssText = `
+			                  display: inline-flex;
+			                  flex-direction: column;
+			                  gap: 20px;
+			               `
+						//this.containerSelector = containerSelector
+						containerSelector.append(mounthInput)
+						containerSelector.append(markInput)
+						containerSelector.append(button)
+						this.button = button
+						containerSelector.append((this.resultBLock = document.createElement("div")))
+						//=====================================
+						this.button.addEventListener("click", this.validate.bind(this))
+						this.button.addEventListener("click", this.ifNoError.bind(this))
+					}
+				}
+				ifNoError() {
+					if (!this.hasErrors && !isNaN(this.userMounth) && !isNaN(this.userMark) && this.userMark !== this.maxMark) {
+						this.resultBLock.innerText = "ви можете виправити оцінку "
+					} else {
+						this.resultBLock.innerText = "у вас максимальний бал"
+					}
+				}
+				IsholidaysNow() {
+					for (const mounth of this.holidayMounths) {
+						if (mounth === this.userMounth) return true
+					}
+					return false
+				}
+				//=====================Валідація======================
+				validate() {
+					try {
+						this.userMounth = parseInt(this.mounthInput.value)
+						this.userMark = Math.ceil(parseFloat(this.markInput.value))
+						if (this.userMounth < 1 || this.userMounth > 12 || this.IsholidaysNow()) throw new IsCorrectMounthError()
+						if (this.userMark < this.minMark || this.userMark > this.maxMark) throw new IsCorrectMarkError(this.userMark)
+						if (this.userMark < this.minMarkToGoNextGrade && this.userMounth === this.lastStudyMounth) throw new CanFixMarkError()
+						this.hasErrors = false
+					} catch (error) {
+						if (error instanceof IsCorrectMounthError) {
+							this.resultBLock.innerText = error.message
+
+							//console.log(error.message)
+						} else if (error instanceof IsCorrectMarkError) {
+							this.resultBLock.innerText = error.message
+						} else if (error instanceof CanFixMarkError) {
+							this.resultBLock.innerText = error.message
+						}
+						this.hasErrors = true
+					}
+				}
+			}
+			window.onload = function () {
+				let student = new Student([2, 4], 5, 1, 100, 40)
+				student.render(document.querySelector(".example"))
+			}
+		</script>
+	</body>
+</html>
